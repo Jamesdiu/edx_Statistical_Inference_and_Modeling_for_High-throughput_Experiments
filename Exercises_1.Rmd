@@ -1,0 +1,59 @@
+---
+title: "Introduction and Motivation"
+output:
+  html_document:
+    df_print: paged
+---
+# Load package
+```{r message=FALSE}
+require(devtools)
+install_github("genomicsclass/GSE5859Subset")
+library(GSE5859Subset)
+```
+# Load data
+```{r}
+data(GSE5859Subset)
+```
+```{r}
+head(geneAnnotation)
+```
+```{r}
+head(geneExpression)
+```
+```{r}
+head(sampleInfo)
+```
+
+## Q1. Number of samples on 2005-06-27: *5*
+```{r}
+nrow(sampleInfo[sampleInfo$date=="2005-06-27",])
+```
+## Q2. Number of the genes represented in this particular technology are on chromosome Y: *21*
+```{r}
+table(geneAnnotation$CHR)
+```
+## Q3. Log expression value of the for gene ARPC1A on the one subject that was measured on 2005-06-10: 8.233599
+```{r}
+geneExpression[which(geneAnnotation$SYMBOL=="ARPC1A"),
+               which(sampleInfo$date=="2005-06-10")]
+```
+## Q4. Median value of each column. What is the median value of these values? *5.421568*
+```{r}
+median(apply(geneExpression, 2, function(x) median(x)))
+```
+## Q5. Write a function that takes a vector of values e and a binary vector group coding two groups, and returns the p-value from a t-test: t.test( e[group==1], e[group==0])$p.value.
+
+Now define g to code cases (1) and controls (0) like this g <- factor(sampleInfo$group)
+
+Next use the function apply() to run a t-test for each row of geneExpression and obtain the p-value.
+
+What is smallest p-value among all these t-tests? *1.406803e-21*
+```{r}
+pvalue <- function(e, group){
+  t.test(e[group==1], e[group==0])$p.value
+}
+g <- factor(sampleInfo$group)
+min(apply(geneExpression, 1, pvalue, g))
+```
+
+
